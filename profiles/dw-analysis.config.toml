@@ -1,0 +1,21 @@
+# Native Codex 0.134+ profile layer. CLI launcher pins permissions above project settings.
+model = "gpt-6-astra"
+model_reasoning_effort = "high"
+sandbox_mode = "read-only"
+approval_policy = "never"
+web_search = "disabled"
+
+[sandbox_workspace_write]
+network_access = false
+writable_roots = []
+
+[agents]
+enabled = false
+max_concurrent_threads_per_session = 2
+
+[features]
+hooks = false
+plugins = false
+remote_plugin = false
+apps = false
+enable_mcp_apps = false

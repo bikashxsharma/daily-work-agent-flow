@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature Plan"
+  short_description: "Create technical plans with approval checkpoints"
+  default_prompt: "Use $feature-plan for the current repository task."

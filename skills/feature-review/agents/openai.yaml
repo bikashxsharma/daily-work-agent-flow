@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature Review"
+  short_description: "Review changes independently in read-only mode"
+  default_prompt: "Use $feature-review for the current repository task."

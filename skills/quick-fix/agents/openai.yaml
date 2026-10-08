@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quick Fix"
+  short_description: "Fix small issues with focused validation"
+  default_prompt: "Use $quick-fix for the current repository task."

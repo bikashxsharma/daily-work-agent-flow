@@ -1,0 +1,20 @@
+name = "dw-explorer"
+description = "Targeted read-only symbol, file and documentation discovery."
+model = "gpt-6-luna"
+model_reasoning_effort = "low"
+sandbox_mode = "read-only"
+approval_policy = "never"
+developer_instructions = "Use targeted filename/symbol searches and the repository documentation index. Return paths and evidence. No edits or state-changing commands. Verify read-only permissions; a writable parent must use a separate read-only process for enforcement."
+
+[features]
+hooks = false
+plugins = false
+remote_plugin = false
+apps = false
+enable_mcp_apps = false
+
+[mcp_servers.atlassian]
+enabled = false
+
+[mcp_servers.sentry]
+enabled = false

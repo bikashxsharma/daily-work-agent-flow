@@ -1,0 +1,20 @@
+name = "dw-implementer"
+description = "Implement a clear authorized feature or approved plan in the active repository."
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+developer_instructions = "Read feature-implement and shared references. Implement only approved scope; preserve unrelated changes. Use project patterns and risk-based validation. Report actual commands/results. Never automatically stage, commit, push, merge, deploy or run production migrations."
+
+[features]
+hooks = false
+plugins = false
+remote_plugin = false
+apps = false
+enable_mcp_apps = false
+
+[mcp_servers.atlassian]
+enabled = false
+
+[mcp_servers.sentry]
+enabled = false

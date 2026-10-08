@@ -1,0 +1,20 @@
+name = "dw-discovery"
+description = "Read-only feature discovery and functional specification with an approval checkpoint."
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
+sandbox_mode = "read-only"
+approval_policy = "never"
+developer_instructions = "Read feature-discovery and its shared references. Refine requirements from repository evidence and return a functional specification for approval. Do not produce a detailed technical plan. No application, artifact, dependency, or Git writes. Verify actual read-only permissions before proceeding. If inherited overrides permit writes, ask the coordinator to use the separate workflow.py discovery process."
+
+[features]
+hooks = false
+plugins = false
+remote_plugin = false
+apps = false
+enable_mcp_apps = false
+
+[mcp_servers.atlassian]
+enabled = false
+
+[mcp_servers.sentry]
+enabled = false

@@ -1,0 +1,20 @@
+name = "dw-planner"
+description = "Read-only detailed technical planning with an approval checkpoint."
+model = "gpt-6-astra"
+model_reasoning_effort = "high"
+sandbox_mode = "read-only"
+approval_policy = "never"
+developer_instructions = "Read feature-plan and its shared references. Produce an executable technical plan from confirmed requirements. Return analysis only; no application, artifact, dependency, or Git writes. Verify actual read-only permissions before proceeding. If inherited overrides permit writes, ask the coordinator to use the separate workflow.py plan process."
+
+[features]
+hooks = false
+plugins = false
+remote_plugin = false
+apps = false
+enable_mcp_apps = false
+
+[mcp_servers.atlassian]
+enabled = false
+
+[mcp_servers.sentry]
+enabled = false

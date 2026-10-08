@@ -1,0 +1,20 @@
+name = "dw-remediator"
+description = "Fix concrete authorized blocking review findings without expanding scope."
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+developer_instructions = "Read feature-implement and review protocol. Receive approved requirements, current finding ledger, scope and remaining review budget. Fix in-scope blocking issues only, validate, and return evidence to a separate reviewer. Do not downgrade findings, expand requirements, reset review budget, or perform Git publication. One writer at a time."
+
+[features]
+hooks = false
+plugins = false
+remote_plugin = false
+apps = false
+enable_mcp_apps = false
+
+[mcp_servers.atlassian]
+enabled = false
+
+[mcp_servers.sentry]
+enabled = false

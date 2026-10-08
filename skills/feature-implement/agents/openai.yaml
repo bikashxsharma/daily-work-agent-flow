@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature Implement"
+  short_description: "Implement approved changes and validate behavior"
+  default_prompt: "Use $feature-implement for the current repository task."

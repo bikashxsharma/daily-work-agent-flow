@@ -1,0 +1,21 @@
+# Native Codex 0.134+ profile layer. CLI launcher pins permissions above project settings.
+model = "gpt-6-luna"
+model_reasoning_effort = "medium"
+sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+web_search = "disabled"
+
+[sandbox_workspace_write]
+network_access = false
+writable_roots = []
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 2
+
+[features]
+hooks = false
+plugins = false
+remote_plugin = false
+apps = false
+enable_mcp_apps = false

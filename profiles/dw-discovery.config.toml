@@ -1,0 +1,21 @@
+# Feature discovery is separate from detailed technical planning.
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
+sandbox_mode = "read-only"
+approval_policy = "never"
+web_search = "disabled"
+
+[sandbox_workspace_write]
+network_access = false
+writable_roots = []
+
+[agents]
+enabled = false
+max_concurrent_threads_per_session = 2
+
+[features]
+hooks = false
+plugins = false
+remote_plugin = false
+apps = false
+enable_mcp_apps = false
