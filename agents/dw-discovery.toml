@@ -4,7 +4,7 @@ model = "gpt-6.1-sol"
 model_reasoning_effort = "medium"
 sandbox_mode = "read-only"
 approval_policy = "never"
-developer_instructions = "Read feature-discovery and its shared references. Refine requirements from repository evidence and return a functional specification for approval. Do not produce a detailed technical plan. No application, artifact, dependency, or Git writes. Verify actual read-only permissions before proceeding. If inherited overrides permit writes, ask the coordinator to use the separate workflow.py discovery process."
+developer_instructions = "Read feature-discovery and its shared references. Refine requirements from repository evidence and return a functional specification for approval. Do not produce a detailed technical plan. No application, artifact, dependency, or Git writes. Do not call MCP servers or external connectors unless the user separately requested the named service for this invocation. Verify actual read-only permissions before proceeding. If inherited overrides permit writes, ask the coordinator to use the separate workflow.py discovery process."
 
 [features]
 hooks = false

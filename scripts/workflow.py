@@ -46,8 +46,14 @@ def build_command(args, effective=None):
     repo = repository(args.repo)
     if args.auto_implement and args.phase not in ('plan', 'delivery'):
         raise ValueError('--auto-implement is only valid for plan or delivery')
-    # The coordinator can write; its analysis workers always run separately read-only.
-    readonly = args.phase in ('discovery', 'review', 'plan') and not args.auto_implement
+    if args.write_plan and args.phase not in ('plan', 'delivery'):
+        raise ValueError('--write-plan is only valid for plan or delivery')
+    if (args.auto_implement or args.write_plan) and args.exec:
+        raise ValueError('--auto-implement/--write-plan belong on the coordinator, not an --exec phase worker')
+    # Planning is read-only by default. A coordinator is writable only when
+    # implementation or the explicitly requested Markdown artifact requires it.
+    readonly = (args.phase in ('discovery', 'review') or
+                (args.phase == 'plan' and not args.auto_implement and not args.write_plan))
     if args.auto_implement and args.phase == 'plan':
         profile_name = 'dw-delivery'
     profile = tomllib.loads((ROOT / 'profiles' / (profile_name + '.config.toml')).read_text())
@@ -64,12 +70,25 @@ def build_command(args, effective=None):
                '-c', 'features.enable_mcp_apps=false']
     if readonly:
         options += ['-c', 'agents.enabled=false']
+    allowed_mcp = set(args.allow_mcp)
     if effective is not None:
         # The OS sandbox does not constrain remote MCP effects. Disable every server
-        # from the effective user/profile/project configuration for these local workflows.
-        for name in effective.get('mcp_servers', {}):
-            options += ['-c', 'mcp_servers.' + json.dumps(name) + '.enabled=false']
-    prompt = '$' + skill + (' --auto-implement' if args.auto_implement else '') + ' ' + args.task
+        # except services explicitly opted into this invocation by launcher flag.
+        configured = set(effective.get('mcp_servers', {}))
+        missing = allowed_mcp - configured
+        if missing:
+            raise ValueError('Requested MCP server is not configured: ' + ', '.join(sorted(missing)))
+        for name in sorted(configured):
+            enabled = 'true' if name in allowed_mcp else 'false'
+            options += ['-c', 'mcp_servers.' + json.dumps(name) + '.enabled=' + enabled]
+    flags = []
+    if args.auto_implement:
+        flags.append('--auto-implement')
+    if args.write_plan:
+        flags.append('--write-plan')
+    if args.verbose:
+        flags.append('--verbose')
+    prompt = '$' + skill + ((' ' + ' '.join(flags)) if flags else '') + ' ' + args.task
     prompt += ('\n\nWorkflow launcher: active repository is ' + str(repo) +
                '. Read the selected skill at ' + str(ROOT / 'skills' / skill / 'SKILL.md') + '.')
     if readonly:
@@ -80,6 +99,28 @@ def build_command(args, effective=None):
         prompt += (' You are the workspace-write coordinator. Use scripts/workflow.py from '
                    + str(ROOT) + ' with --exec for separate read-only analysis/review workers. '
                    'Display their complete specification/plan before applying approval gates.')
+        if args.phase == 'plan' and args.write_plan:
+            prompt += (' After the read-only planner returns, save the exact complete plan in this '
+                       'repository with scripts/artifact.py save --feature <slug> --kind plan '
+                       '--next, report its '
+                       'repository-relative path, and do not modify application code before the '
+                       'applicable approval gate.')
+        elif args.phase == 'plan':
+            prompt += (' Do not create or modify a plan artifact because --write-plan was not '
+                       'provided. Planning itself remains delegated to the read-only worker.')
+    if args.verbose:
+        prompt += (' Verbose reporting is enabled for this invocation: provide the skill-specific '
+                   'evidence summaries and no hidden reasoning or complete tool logs. This session '
+                   'was launched with model ' + profile['model'] + ' and reasoning effort ' +
+                   profile['model_reasoning_effort'] + '; report that launcher-selected usage. '
+                   'Forward --verbose to phase workers.')
+    if allowed_mcp:
+        prompt += (' The user explicitly opted into these MCP servers for this invocation only: '
+                   + ', '.join(sorted(allowed_mcp)) + '. Use only those named services and only '
+                   'for the separately requested operation. Forward the matching --allow-mcp '
+                   'arguments only to phase workers that need that operation.')
+    else:
+        prompt += ' MCP servers and external connectors are disabled for this invocation.'
     if args.exec:
         return ['codex', 'exec', *options, '--cd', str(repo), '--ephemeral', prompt]
     return ['codex', *options, '--cd', str(repo), prompt]
@@ -91,6 +132,11 @@ def main():
     parser.add_argument('task', nargs='?', default='')
     parser.add_argument('--repo', type=Path, default=Path.cwd())
     parser.add_argument('--auto-implement', action='store_true')
+    parser.add_argument('--write-plan', action='store_true',
+                        help='Persist only the proposed Markdown plan in the active repository')
+    parser.add_argument('--verbose', action='store_true', help='Expand evidence summaries only')
+    parser.add_argument('--allow-mcp', action='append', default=[], metavar='NAME',
+                        help='Explicitly enable one configured MCP server for this invocation')
     parser.add_argument('--exec', action='store_true', help='Fresh noninteractive phase; no chat history')
     parser.add_argument('--dry-run', action='store_true', help='Print command; skip capability preflight')
     args = parser.parse_intermixed_args()
@@ -107,7 +153,7 @@ def main():
                 'cwd': str(repository(args.repo)), 'includeLayers': False})['config']
     command = build_command(args, effective)
     if args.dry_run:
-        print('Dry run: MCP disabling is added after effective-config preflight.')
+        print('Dry run: MCP allow/deny overrides are added after effective-config preflight.')
         print(shlex.join(command))
     else:
         os.execvp(command[0], command)

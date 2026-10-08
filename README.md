@@ -22,6 +22,8 @@ python3.11 /Users/bikashsharma/agents/daily-work-agent-flow/scripts/workflow.py 
 
 Planning, discovery and review use separate read-only sessions; a skill alone cannot change a session's sandbox or model. Native parent permission overrides can supersede subagent defaults, so the launcher is the enforced phase boundary. The writable coordinator displays the plan and waits for approval unless explicitly invoked with `--auto-implement`.
 
+Planning is fully read-only by default. Add `--write-plan` to save only a reviewable Markdown plan in the calling repository under `.ai-workflow/features/<feature>/plan.md`; later plans are versioned without overwrite. That flag does not authorize application-code or other project changes. All skills accept `--verbose` for expanded evidence summaries. MCP/connectors are disabled unless explicitly opted into the launcher with `--allow-mcp NAME` for a separately requested operation.
+
 | Skill | Use it for |
 |---|---|
 | `$feature-discovery` | Explore requirements and get a specification for approval |
@@ -46,7 +48,7 @@ daily-work-agent-flow/
 │   └── feature-delivery/{SKILL.md,agents/openai.yaml}
 ├── agents/dw-{discovery,planner,reviewer,implementer,remediator,explorer}.toml
 ├── profiles/dw-{discovery,analysis,review,code,quick,delivery}.config.toml
-├── references/{workflow,execution,artifacts,review}.md
+├── references/{workflow,execution,artifacts,reporting,review}.md
 ├── scripts/{install,workflow,artifact,codex_rpc,probe,test_setup,test_native,validate}.py
 └── docs/{daily-usage,workflow-guide,model-configuration,validation}.md
 ```

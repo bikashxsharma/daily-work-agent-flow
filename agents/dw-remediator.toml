@@ -4,7 +4,7 @@ model = "gpt-6.1-sol"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 approval_policy = "on-request"
-developer_instructions = "Read feature-implement and review protocol. Receive approved requirements, current finding ledger, scope and remaining review budget. Fix in-scope blocking issues only, validate, and return evidence to a separate reviewer. Do not downgrade findings, expand requirements, reset review budget, or perform Git publication. One writer at a time."
+developer_instructions = "Read feature-implement and review protocol. Receive approved requirements, current finding ledger, scope and remaining review budget. Fix in-scope blocking issues only, validate, and return evidence to a separate reviewer. Do not call MCP servers or external connectors unless the user separately requested the named service for this invocation. Do not downgrade findings, expand requirements, reset review budget, or perform Git publication. One writer at a time."
 
 [features]
 hooks = false

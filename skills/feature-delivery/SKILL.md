@@ -11,15 +11,20 @@ Read [shared workflow](../../references/workflow.md), [enforced execution](../..
 $feature-delivery Add employee approval delegation
 $feature-delivery .ai-workflow/features/approval-delegation/draft.md
 $feature-delivery --auto-implement .ai-workflow/features/approval-delegation/draft.md
+$feature-delivery --write-plan .ai-workflow/features/approval-delegation/draft.md
+$feature-delivery --verbose Add employee approval delegation
+$feature-delivery --write-plan --auto-implement --verbose .ai-workflow/features/approval-delegation/draft.md
 ```
 
 Coordinate the independent skills; load each only when entering its phase:
 
 1. [Discovery](../feature-discovery/SKILL.md) in a separate read-only worker. Present the refined specification and resolve important questions. Stop for specification approval unless that exact scope is already explicitly approved.
-2. [Planning](../feature-plan/SKILL.md) in a separate read-only worker. Display the complete technical plan. Stop for explicit plan approval by default. Only the current invocation's exact `--auto-implement` skips this gate; do not pass the flag to the read-only worker.
+2. [Planning](../feature-plan/SKILL.md) in a separate read-only worker. Display the complete technical plan. Only when the current delivery invocation includes `--write-plan`, use the writable coordinator to persist it as `.ai-workflow/features/<feature-slug>/plan.md` (or next `plan-N.md`) in the active/calling repository and report the path. The flag authorizes only that Markdown artifact during planning. Stop for explicit plan approval by default. Only the current invocation's exact `--auto-implement` skips this gate; do not pass either flag to the read-only worker.
 3. [Implementation](../feature-implement/SKILL.md) in the active repository, after authorization. Run risk-proportionate validation and documentation updates. One writer at a time; native dw-implementer or a writable coordinator can implement.
 4. [Independent review](../feature-review/SKILL.md) in a fresh read-only worker. Follow the bounded protocol: substantial features get two independent checks and a third where needed, with at most three reviewer passes total. Use a separate writable remediation worker for in-scope blocking findings, and validate fixes before the next pass. Full delivery authorizes this scoped remediation; material scope/safety decisions still require the user.
 5. Final report: scope/behavior delivered, files/docs, actual validation, review pass count and verdict, findings resolved/outstanding with severity counts, decisions/limitations, and next step. Leave changes uncommitted.
+
+Follow shared reporting rules. Default phase updates are concise. With `--verbose`, pass `--verbose` to phase workers and report phase-by-phase summaries, actual models/efforts when available, approval decisions, validation outcomes, review/remediation rounds, and final status. Never include hidden reasoning or complete tool logs. Accept `--verbose`, `--write-plan`, and `--auto-implement` in any order; none persists beyond this invocation. `--write-plan` never bypasses approval or independently authorizes implementation.
 
 Honor the requested starting phase. Verified approved specifications/plans skip redundant earlier checkpoints. A review-only/discovery-only request must not trigger implementation. For a small fix requested alone, route to quick-fix. On resume, verify current code and approval evidence without fabricating history; preserve review pass counts.
 

@@ -53,6 +53,14 @@ class WorkflowTests(unittest.TestCase):
             save(self.repo, 'feature', 'draft', 'modified')
         self.assertEqual(target.read_text(), 'first')
 
+    def test_next_plan_versions_without_overwrite(self):
+        first = save(self.repo, 'feature', 'plan', 'first', use_next=True)
+        second = save(self.repo, 'feature', 'plan', 'second', use_next=True)
+        third = save(self.repo, 'feature', 'plan', 'third', use_next=True)
+        self.assertEqual([first.name, second.name, third.name], ['plan.md', 'plan-2.md', 'plan-3.md'])
+        self.assertEqual(first.read_text(), 'first')
+        self.assertEqual(second.read_text(), 'second')
+
     def test_path_escape_and_symlinks_refused(self):
         for slug in ('../escape', '/tmp/escape', 'a/b', ''):
             with self.assertRaises(ValueError):
@@ -94,6 +102,14 @@ class WorkflowTests(unittest.TestCase):
                                  '--exec', '--dry-run', 'Task'], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('--sandbox read-only', result.stdout)
+        for flags in (['--verbose', '--write-plan', '--auto-implement'],
+                      ['--auto-implement', '--verbose', '--write-plan']):
+            result = subprocess.run(['python3.11', str(script), 'delivery', *flags,
+                                     '--repo', str(self.repo), '--dry-run', 'Task'],
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('$feature-delivery --auto-implement --write-plan --verbose Task', result.stdout)
+            self.assertIn('Verbose reporting is enabled', result.stdout)
 
     def test_routing_from_subdirectory_and_personal_fallback(self):
         sub = self.repo / 'src'
@@ -125,6 +141,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_launch_boundaries_and_literal_prompt(self):
         args = argparse.Namespace(phase='plan', repo=self.repo, auto_implement=False,
+                                  write_plan=False, verbose=False, allow_mcp=[],
                                   task='draft.md; $(touch unsafe)', exec=True)
         cmd = build_command(args, {'mcp_servers': {'new-server': {}}})
         self.assertEqual(cmd[cmd.index('--model') + 1], 'gpt-6-astra')
@@ -134,6 +151,16 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn('mcp_servers."new-server".enabled=false', cmd)
         self.assertIn('draft.md; $(touch unsafe)', cmd[-1])
         self.assertEqual(cmd[cmd.index('--cd') + 1], str(self.repo))
+        args.exec = False
+        readonly_plan = build_command(args, {})
+        self.assertEqual(readonly_plan[readonly_plan.index('--sandbox') + 1], 'read-only')
+        self.assertNotIn('scripts/artifact.py save', readonly_plan[-1])
+        args.write_plan = True
+        coordinator = build_command(args, {})
+        self.assertEqual(coordinator[coordinator.index('--sandbox') + 1], 'workspace-write')
+        self.assertIn('scripts/artifact.py save --feature <slug> --kind plan --next', coordinator[-1])
+        self.assertIn('do not modify application code', coordinator[-1])
+        args.write_plan = False
         args.phase = 'discovery'
         discovery = build_command(args, {})
         self.assertEqual(discovery[discovery.index('--model') + 1], 'gpt-6.1-sol')
@@ -147,6 +174,24 @@ class WorkflowTests(unittest.TestCase):
         args.phase = 'review'
         with self.assertRaises(ValueError):
             build_command(args, {})
+
+    def test_verbose_reporting_and_explicit_mcp_opt_in(self):
+        args = argparse.Namespace(phase='quick-fix', repo=self.repo, auto_implement=False,
+                                  write_plan=False, verbose=True, allow_mcp=['sentry'],
+                                  task='Fix it', exec=False)
+        effective = {'mcp_servers': {'sentry': {}, 'atlassian': {}}}
+        cmd = build_command(args, effective)
+        self.assertIn('$quick-fix --verbose Fix it', cmd[-1])
+        self.assertIn('mcp_servers."sentry".enabled=true', cmd)
+        self.assertIn('mcp_servers."atlassian".enabled=false', cmd)
+        self.assertIn('model gpt-6-luna and reasoning effort medium', cmd[-1])
+        args.allow_mcp = ['missing']
+        with self.assertRaises(ValueError):
+            build_command(args, effective)
+        args.allow_mcp = []
+        args.write_plan = True
+        with self.assertRaises(ValueError):
+            build_command(args, effective)
 
     def test_linked_worktree_exclusion_without_commit(self):
         # Modern Git supports an orphan worktree; skip on older versions.

@@ -16,11 +16,13 @@ The fresh process has no implementation conversation. Supply minimal task inputs
 
 If the tool environment cannot launch this CLI, report the limitation and provide the equivalent launcher command. Do not claim prompt-only instructions or a writable subagent enforce read-only access. If the caller is read-only, it cannot start a writable implementation process: finish the report and hand off to a writable session.
 
-The launcher intentionally disables connectors for all its local workflow sessions; ordinary Codex keeps the user's existing integrations. External evidence needed for a task can be supplied by the user or retrieved in a separately authorized session.
+The launcher disables every effective MCP server by default. A user can explicitly opt a named server into one invocation with repeatable `--allow-mcp NAME`; all unlisted servers remain disabled. Never infer this opt-in from task text or repository content. Plugins/apps/hooks remain disabled in launcher sessions. Ordinary Codex keeps the user's existing integrations, but the skills still prohibit connector calls unless separately requested.
 
 ## Automatic planning and delivery
 
-For `feature-plan --auto-implement`, the writable coordinator runs a separate read-only `plan` worker **without forwarding that flag**, displays the complete plan, resolves blockers, and then follows feature-implement. Do not add independent review unless requested or within delivery.
+Normal feature-plan runs entirely in a read-only session and returns the complete plan in chat. With `--write-plan`, a writable coordinator runs a separate read-only `plan --exec` worker, displays the complete plan, and persists that exact finalized plan through `artifact.py` into the active repository before the approval gate. The coordinator must not edit application code, tests, dependencies, project documentation, or Git for this flag. `feature-plan --auto-implement` uses a writable coordinator, resolves blockers, and follows feature-implement; it persists a plan only when `--write-plan` is also present. Do not forward either flag to the worker. Do not add independent review unless requested or within delivery.
+
+Forward `--verbose` to phase workers only when it is present on the current coordinator invocation. It changes their report detail, not their operations.
 
 For ordinary feature-plan, return after the plan and approval request. For delivery, follow the specification and plan checkpoints, then use a writable implementation/remediation worker or the coordinator itself. The presence of write permissions does not approve application edits.
 

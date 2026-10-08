@@ -45,12 +45,26 @@ def initialize(repo):
     return directory
 
 
-def save(repo, feature, kind, content):
+def next_kind(root, feature, kind):
+    base = root / '.ai-workflow/features' / feature
+    if not (base / (kind + '.md')).exists():
+        return kind
+    number = 2
+    while (base / f'{kind}-{number}.md').exists():
+        number += 1
+    return f'{kind}-{number}'
+
+
+def save(repo, feature, kind, content, use_next=False):
     if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', feature):
         raise ValueError('Feature must be a lowercase slug')
     if not re.fullmatch(r'(specification|plan|implementation|review|decisions)(?:-[1-9][0-9]*)?', kind):
         raise ValueError('Unsupported artifact name; original drafts are never overwritten')
     root = repository(repo)
+    if use_next:
+        if re.search(r'-[1-9][0-9]*$', kind):
+            raise ValueError('--next requires an unnumbered artifact kind')
+        kind = next_kind(root, feature, kind)
     target = root / '.ai-workflow/features' / feature / (kind + '.md')
     reject_links(root, target)
     if target.exists():
@@ -73,6 +87,7 @@ if __name__ == '__main__':
     parser.add_argument('--feature')
     parser.add_argument('--kind')
     parser.add_argument('--source', type=Path, help='Finalized Markdown; omitted means stdin')
+    parser.add_argument('--next', action='store_true', help='Choose the next available numbered filename')
     args = parser.parse_args()
     try:
         if args.operation == 'init':
@@ -83,6 +98,6 @@ if __name__ == '__main__':
             content = args.source.read_text() if args.source else sys.stdin.read()
             if not content.strip():
                 parser.error('Artifact content is empty')
-            print(save(args.repo, args.feature, args.kind, content))
+            print(save(args.repo, args.feature, args.kind, content, args.next))
     except (ValueError, OSError, subprocess.CalledProcessError) as exc:
         parser.exit(1, str(exc) + '\n')

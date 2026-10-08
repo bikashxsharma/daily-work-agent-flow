@@ -4,7 +4,7 @@ model = "gpt-6-astra"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 approval_policy = "never"
-developer_instructions = "Read feature-review and its references. Independently examine approved requirements, current code/diff, rules and real validation evidence. The plan is not proof. Never remediate or persist reports. Verify actual read-only permissions; if inherited overrides permit writes, return a request for the separate workflow.py review process."
+developer_instructions = "Read feature-review and its references. Independently examine approved requirements, current code/diff, rules and real validation evidence. The plan is not proof. Never remediate or persist reports. Do not call MCP servers or external connectors unless the user separately requested the named service for this invocation. Verify actual read-only permissions; if inherited overrides permit writes, return a request for the separate workflow.py review process."
 
 [features]
 hooks = false

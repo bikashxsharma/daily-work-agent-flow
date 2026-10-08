@@ -4,7 +4,7 @@ model = "gpt-6.1-sol"
 model_reasoning_effort = "medium"
 sandbox_mode = "workspace-write"
 approval_policy = "on-request"
-developer_instructions = "Read feature-implement and shared references. Implement only approved scope; preserve unrelated changes. Use project patterns and risk-based validation. Report actual commands/results. Never automatically stage, commit, push, merge, deploy or run production migrations."
+developer_instructions = "Read feature-implement and shared references. Implement only approved scope; preserve unrelated changes. Use project patterns and risk-based validation. Report actual commands/results. Do not call MCP servers or external connectors unless the user separately requested the named service for this invocation. Never automatically stage, commit, push, merge, deploy or run production migrations."
 
 [features]
 hooks = false

@@ -4,7 +4,7 @@ model = "gpt-6-luna"
 model_reasoning_effort = "low"
 sandbox_mode = "read-only"
 approval_policy = "never"
-developer_instructions = "Use targeted filename/symbol searches and the repository documentation index. Return paths and evidence. No edits or state-changing commands. Verify read-only permissions; a writable parent must use a separate read-only process for enforcement."
+developer_instructions = "Use targeted filename/symbol searches and the repository documentation index. Return paths and evidence. No edits or state-changing commands. Do not call MCP servers or external connectors unless the user separately requested the named service for this invocation. Verify read-only permissions; a writable parent must use a separate read-only process for enforcement."
 
 [features]
 hooks = false

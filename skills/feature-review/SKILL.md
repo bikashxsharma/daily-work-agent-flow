@@ -11,6 +11,7 @@ Read [shared workflow](../../references/workflow.md), [enforced execution](../..
 $feature-review Review current uncommitted changes
 $feature-review Review changes against main
 $feature-review .ai-workflow/features/approval-delegation/specification.md
+$feature-review --verbose Review current uncommitted changes
 ```
 
 Inputs: explicit review scope and requirements/specification, final diff, surrounding code, repository rules/docs, real validation evidence. For a Markdown input, read it as requirements and identify the associated diff safely; ask if the change scope is unclear. Do not assume all dirty files belong to this task. The implementation plan is optional background.
@@ -19,6 +20,6 @@ A writable caller must delegate to a fresh read-only reviewer process. If alread
 
 Allowed: reads, diff/status inspection, safe read-only analysis. Prohibited: edits, dependency installs, Git mutations, artifact persistence, state-changing tests, or fixing findings inside the reviewer. Pass test requests to a writable phase. Standalone review is report-only unless remediation is separately authorized. Then a writable coordinator applies the bounded review/remediation protocol with a separate implementer; never more than three passes by default.
 
-Output every finding in the protocol's format with severity, blocking/suggestion classification, location, evidence, expected/problematic behavior and fix. Include counts by severity, total findings, unresolved blockers, validation limitations, and APPROVED / CHANGES_REQUESTED / NEEDS_USER_DECISION. Validate each finding against source and requirements; no speculative issue lists or unsupported approval.
+Output every finding in the protocol's format with severity, blocking/suggestion classification, location, evidence, expected/problematic behavior and fix. Include counts by severity, total findings, unresolved blockers, validation limitations, and APPROVED / CHANGES_REQUESTED / NEEDS_USER_DECISION. Validate each finding against source and requirements; no speculative issue lists or unsupported approval. Follow shared reporting rules: concise by default; with `--verbose`, group findings by severity and summarize resolved issues, new issues, evidence, and each review round without exposing raw reasoning or full tool logs.
 
 Model strategy: `dw-review`, Astra/high; fallback Sol/high only if available and disclosed. Escalate material user decisions immediately. Keep context independent and targeted; avoid unnecessary repeat rounds for small clean changes.

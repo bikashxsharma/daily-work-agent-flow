@@ -26,7 +26,7 @@ This repository has no company knowledge-base index.
 Keep small fixes lightweight; record plans only for substantial features.
 ```
 
-Initialize locally only when needed and allowed by repository policy using `scripts/artifact.py init --repo <repo>`. The helper refuses tracked `.ai-workflow` content, checks existing exclusions, and appends `/.ai-workflow/` only when needed to Git's resolved `info/exclude`; it never changes company `.gitignore`. Linked worktrees may share this exclude file. Check with:
+Planning creates no files by default. With `--write-plan`, a constrained coordinator initializes local workflow storage when needed and allowed by repository policy, then saves only the reviewable plan in the calling repository. You can also initialize it with `scripts/artifact.py init --repo <repo>`. The helper refuses tracked `.ai-workflow` content, checks existing exclusions, and appends `/.ai-workflow/` only when needed to Git's resolved `info/exclude`; it never changes company `.gitignore`. Linked worktrees may share this exclude file. Check with:
 
 ```sh
 git check-ignore .ai-workflow/features/approval-delegation/plan.md
@@ -38,11 +38,13 @@ The second command should be empty. Source/test/feature-doc edits remain visible
 
 ## Phase permissions and decisions
 
-Discovery and planning return proposed artifacts. Separate persistence saves finalized content without granting permission to implement. User approval applies to a specific scope/version. Current explicit instructions supersede old drafts; code and documentation are evidence, not automatically the desired behavior.
+Discovery returns a proposed specification. Planning returns a proposed plan in chat. Only `--write-plan` invokes the separate deterministic coordinator step that saves the exact plan as `plan.md` or the next `plan-N.md`; this does not grant permission to implement. User approval applies to a specific scope/version. Current explicit instructions supersede old drafts; code and documentation are evidence, not automatically the desired behavior.
 
 The default full workflow is discovery → specification approval → planning → plan approval → implementation/validation → independent review → scoped remediation/validation → final review report. A verified approved input can enter at its appropriate phase. `--auto-implement` applies to one invocation's plan gate only.
 
 Read-only phases use `read-only` plus `approval_policy="never"` and cannot escalate to writes. Since parent overrides can supersede native subagent defaults, writable coordinators launch fresh CLI workers for these phases. Runtime metadata may still be written by Codex itself. App/MCP tools are disabled in the launcher because an OS filesystem sandbox does not constrain remote service side effects.
+
+All six skills are concise by default and accept invocation-scoped `--verbose`. Verbose reports add task-relevant evidence and phase summaries, never hidden reasoning or full logs, and do not change execution or approval. MCP servers/connectors are opt-in only: use `--allow-mcp NAME` on the launcher after separately requesting that service. Unlisted servers remain disabled.
 
 Substantial delivery gets two independent review checks, optionally a third; three passes is the default total cap. Reviewers receive requirements, current scoped diff, surrounding code, rules, docs and actual validation evidence, not an implementation sales pitch. Reviewers never edit. Remediation uses a separate writer; no fix after the last pass is represented as reviewed. Report APPROVED, CHANGES_REQUESTED or NEEDS_USER_DECISION with severity counts and unresolved blocking IDs.
 
