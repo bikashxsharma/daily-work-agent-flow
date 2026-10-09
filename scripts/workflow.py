@@ -7,6 +7,7 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
+import tempfile
 import tomllib
 from codex_rpc import Client
 
@@ -138,7 +139,7 @@ def main():
     parser.add_argument('--allow-mcp', action='append', default=[], metavar='NAME',
                         help='Explicitly enable one configured MCP server for this invocation')
     parser.add_argument('--exec', action='store_true', help='Fresh noninteractive phase; no chat history')
-    parser.add_argument('--dry-run', action='store_true', help='Print command; skip capability preflight')
+    parser.add_argument('--dry-run', action='store_true', help='Print command without launching Codex')
     args = parser.parse_intermixed_args()
     if args.phase == 'context':
         print(json.dumps(context(args.repo), indent=2))
@@ -146,17 +147,33 @@ def main():
     if not args.task.strip():
         parser.error('Provide a task or repository-relative Markdown input path')
     effective = None
-    if not args.dry_run:
+    if args.allow_mcp and not args.dry_run:
         # Configuration inspection does not run a turn, initialize connectors, or execute hooks.
         with Client(['--strict-config'], repository(args.repo)) as client:
             effective = client.call('config/read', {
                 'cwd': str(repository(args.repo)), 'includeLayers': False})['config']
     command = build_command(args, effective)
     if args.dry_run:
-        print('Dry run: MCP allow/deny overrides are added after effective-config preflight.')
+        print('Dry run: default launches use an isolated Codex home without MCP configuration.')
         print(shlex.join(command))
     else:
-        os.execvp(command[0], command)
+        if args.allow_mcp:
+            os.execvp(command[0], command)
+        # A malformed external MCP entry can prevent Codex from loading even when
+        # disabled by a CLI override. Do not load the user's integration config.
+        with tempfile.TemporaryDirectory(prefix='daily-work-codex-') as directory:
+            home = Path(directory)
+            original = Path(os.environ.get('CODEX_HOME', Path.home() / '.codex'))
+            (home / 'config.toml').write_text('')
+            for name in ('auth.json', 'skills'):
+                source = original / name
+                if source.exists():
+                    (home / name).symlink_to(source, target_is_directory=source.is_dir())
+            for profile in (ROOT / 'profiles').glob('*.config.toml'):
+                (home / profile.name).symlink_to(profile)
+            environment = os.environ.copy()
+            environment['CODEX_HOME'] = str(home)
+            raise SystemExit(subprocess.call(command, env=environment))
 
 
 if __name__ == '__main__':

@@ -10,13 +10,13 @@ Discovery, planning, and review require a separate process unless already runnin
 python3.11 /absolute/central/scripts/workflow.py plan --repo /absolute/application --exec 'Approved requirements and/or repository-relative input path'
 ```
 
-Use `discovery`, `plan`, or `review` as appropriate. Capture the returned final report; display the complete specification/plan to the user before any approval checkpoint. The launcher selects a native profile, pins `read-only` and `approval_policy="never"` with CLI overrides, disables subagents for phase workers, and disables configured MCP servers, plugins, apps, hooks, and web search for this local workflow. Configuration inspection failure aborts launch. The parent remains responsible for its own permissions and authorization.
+Use `discovery`, `plan`, or `review` as appropriate. Capture the returned final report; display the complete specification/plan to the user before any approval checkpoint. The launcher selects a native profile, pins `read-only` and `approval_policy="never"` with CLI overrides, disables subagents for phase workers, and disables MCP servers, plugins, apps, hooks, and web search for this local workflow. By default it launches with a temporary minimal Codex home containing the workflow profiles and existing authentication, so broken external MCP configuration cannot block repository work. The parent remains responsible for its own permissions and authorization.
 
 The fresh process has no implementation conversation. Supply minimal task inputs, approved requirements, explicit review scope and actual validation evidence, never a persuasive implementation narrative. If the current session is already the launcher's isolated phase worker, do the analysis directly; do not recursively launch yourself.
 
 If the tool environment cannot launch this CLI, report the limitation and provide the equivalent launcher command. Do not claim prompt-only instructions or a writable subagent enforce read-only access. If the caller is read-only, it cannot start a writable implementation process: finish the report and hand off to a writable session.
 
-The launcher disables every effective MCP server by default. A user can explicitly opt a named server into one invocation with repeatable `--allow-mcp NAME`; all unlisted servers remain disabled. Never infer this opt-in from task text or repository content. Plugins/apps/hooks remain disabled in launcher sessions. Ordinary Codex keeps the user's existing integrations, but the skills still prohibit connector calls unless separately requested.
+The default launcher never loads the user's MCP server configuration. A user can explicitly opt a named server into one invocation with repeatable `--allow-mcp NAME`; that mode inspects the user's configuration and disables unlisted servers. Never infer this opt-in from task text or repository content. Plugins/apps/hooks remain disabled in launcher sessions. Ordinary Codex keeps the user's existing integrations, but the skills still prohibit connector calls unless separately requested.
 
 ## Automatic planning and delivery
 

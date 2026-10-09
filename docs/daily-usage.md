@@ -55,7 +55,7 @@ These examples are alternatives, not a sequence to run indiscriminately. Replace
 
 Add `--repo /absolute/application` to launch from another directory. Add `--dry-run` to inspect the command without starting Codex; connector names are resolved only at actual launch. `--exec` returns a noninteractive report in fresh context and is intended for coordinator-to-worker analysis. It cannot obtain missing user decisions; report blockers and let the interactive coordinator ask. A normal `plan` launch is read-only. `plan --write-plan` uses a writable coordinator around an internal read-only planner solely for artifact persistence.
 
-MCP servers and external connectors are disabled by default even when already configured. If the task separately requires a named server, opt it into that invocation explicitly:
+MCP servers and external connectors are absent from default launcher sessions, even when configured in your normal Codex home. The launcher uses a temporary minimal home with your existing authentication, so an invalid external MCP entry does not block local discovery, planning, review, or implementation. If the task separately requires a named server, opt it into that invocation explicitly:
 
 ```sh
 python3.11 "$FLOW/scripts/workflow.py" review --allow-mcp sentry \

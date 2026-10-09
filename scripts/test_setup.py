@@ -7,9 +7,10 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 from artifact import initialize, save
 from install import install, links
-from workflow import build_command, context
+from workflow import build_command, context, main
 
 
 class WorkflowTests(unittest.TestCase):
@@ -23,6 +24,33 @@ class WorkflowTests(unittest.TestCase):
 
     def git(self, *args):
         return subprocess.check_output(['git', '-C', str(self.repo), *args], text=True).strip()
+
+    def test_default_launch_ignores_broken_external_config(self):
+        original = self.base / 'codex-home'
+        original.mkdir()
+        (original / 'config.toml').write_text('[mcp_servers.atlassian]\ninvalid = true\n')
+        (original / 'auth.json').write_text('{}')
+        observed = {}
+
+        def inspect(command, env):
+            home = Path(env['CODEX_HOME'])
+            observed['config'] = (home / 'config.toml').read_text()
+            observed['auth'] = (home / 'auth.json').resolve()
+            observed['profile'] = (home / 'dw-discovery.config.toml').exists()
+            observed['command'] = command
+            return 0
+
+        argv = ['workflow.py', 'discovery', '--repo', str(self.repo), 'Inspect locally']
+        with mock.patch('sys.argv', argv), mock.patch.dict('os.environ', {'CODEX_HOME': str(original)}), \
+                mock.patch('workflow.Client', side_effect=AssertionError('MCP preflight ran')), \
+                mock.patch('workflow.subprocess.call', side_effect=inspect):
+            with self.assertRaises(SystemExit) as result:
+                main()
+        self.assertEqual(result.exception.code, 0)
+        self.assertEqual(observed['config'], '')
+        self.assertEqual(observed['auth'], original / 'auth.json')
+        self.assertTrue(observed['profile'])
+        self.assertNotIn('mcp_servers', ' '.join(observed['command']))
 
     def test_local_exclusion_is_idempotent_and_code_stays_visible(self):
         (self.repo / '.gitignore').write_text('node_modules/\n')

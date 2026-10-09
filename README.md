@@ -53,6 +53,18 @@ daily-work-agent-flow/
 └── docs/{daily-usage,workflow-guide,model-configuration,validation}.md
 ```
 
+### How the pieces fit
+
+| Part | Purpose |
+|---|---|
+| `skills/*/SKILL.md` | Instructions for each workflow: what to inspect, change, validate, and report. `agents/openai.yaml` holds skill UI metadata, not model settings. |
+| `profiles/*.config.toml` | Model, reasoning effort, and permission defaults for launcher sessions. Edit the relevant profile to change the model used by `workflow.py`. |
+| `agents/*.toml` | Model, instructions, and permission defaults for native Codex subagents. These are separate from launcher profiles. |
+| `references/*.md` | Shared rules used by multiple skills, including approval gates and read-only work. |
+| `scripts/workflow.py` | Launches Codex with the selected profile, explicit permissions, and default MCP isolation. A skill invoked in an existing chat cannot switch that chat's model. |
+| `scripts/install.py` and `scripts/artifact.py` | Install the central skill/profile/agent links; manage optional local specification and plan files. |
+| `scripts/codex_rpc.py`, `probe.py`, `validate.py`, and `test_*.py` | Inspect Codex capabilities, check setup, and test the workflow helpers. |
+
 Outside this folder the installer creates only six skill links under `~/.agents/skills/`, six agent links under `${CODEX_HOME:-~/.codex}/agents/`, and six profile links under `${CODEX_HOME:-~/.codex}/`. It never edits the existing `config.toml`, authentication, integrations, global instructions, or application repositories. Sources remain here. Codex's own inspection commands may update its normal caches/runtime metadata.
 
 ## Setup and maintenance
