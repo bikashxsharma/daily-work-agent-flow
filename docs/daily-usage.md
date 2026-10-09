@@ -33,8 +33,8 @@ Planning is read-only and creates no files by default. With `--write-plan`, the 
 Set a convenient shell variable (optional; no shell startup files are edited):
 
 ```sh
-FLOW=/Users/bikashsharma/agents/daily-work-agent-flow
-cd /Users/bikashsharma/tyorel/bolt
+FLOW="$HOME/agents/daily-work-agent-flow"
+cd /path/to/your/application-repository
 python3.11 "$FLOW/scripts/workflow.py" discovery 'Add employee approval delegation'
 python3.11 "$FLOW/scripts/workflow.py" discovery --verbose 'Add employee approval delegation'
 python3.11 "$FLOW/scripts/workflow.py" discovery '.ai-workflow/features/approval-delegation/draft.md'
@@ -51,7 +51,7 @@ python3.11 "$FLOW/scripts/workflow.py" delivery --auto-implement '.ai-workflow/f
 python3.11 "$FLOW/scripts/workflow.py" delivery --auto-implement --verbose 'Add employee approval delegation'
 ```
 
-These examples are alternatives, not a sequence to run indiscriminately. Replace the repository path for a personal project. The supplied personal-project directory did not exist at installation; the setup does not create it.
+These examples are alternatives, not a sequence to run indiscriminately. Replace the application repository path with your own.
 
 Add `--repo /absolute/application` to launch from another directory. Add `--dry-run` to inspect the command without starting Codex; connector names are resolved only at actual launch. `--exec` returns a noninteractive report in fresh context and is intended for coordinator-to-worker analysis. It cannot obtain missing user decisions; report blockers and let the interactive coordinator ask. A normal `plan` launch is read-only. `plan --write-plan` uses a writable coordinator around an internal read-only planner solely for artifact persistence.
 

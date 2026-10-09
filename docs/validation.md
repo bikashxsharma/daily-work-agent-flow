@@ -5,7 +5,7 @@ The installed setup passed structural, behavioral, live discovery, profile-loadi
 ## Environment and preserved state
 
 - Installed CLI: `codex-cli 0.160.1`; central folder started as an empty Git repository with no commits.
-- Actual home was discovered as `/Users/bikashsharma`. The explicit requested `agents/daily-work-agent-flow` location is used. `~/tyorel/bolt` exists; `~/meroafno/code` was absent and was not created.
+- The workflow source was placed under `~/agents/daily-work-agent-flow`. Application repositories were left unchanged.
 - Existing global config selected Astra/high and included project trust plus Atlassian/Sentry integrations. The installer never opens it for writing. No global AGENTS.md or original feature-delivery/openai.yaml was supplied or found in the inspected skill locations; the attachment's principles were implemented directly.
 - Six skill links, six native agent links and six profile links are installed, including the separate Sol/medium discovery role added after the initial setup. Every source is central. No application repository was modified during setup, and no company `.gitignore` was changed. No commits, pushes, merges or deployments were performed.
 - Temporary test repositories and official-manual/schema caches were created under permitted temporary directories. Codex capability probes can update their normal user-level caches/runtime metadata. Authentication was not read or relocated.

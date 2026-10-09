@@ -2,7 +2,7 @@
 
 Six reusable skills for company and personal repositories. This folder is the source of truth; user-level symlinks make the skills available wherever Codex starts. Built for the installed Codex CLI **0.160.1** on macOS, using Python **3.11+** for the small setup helpers.
 
-Canonical location: `/Users/bikashsharma/agents/daily-work-agent-flow`. Your explicit current-folder request supersedes the pasted task's `agetns` example. No second workflow directory is created.
+Example installation location: `~/agents/daily-work-agent-flow`. Adjust the commands below if you cloned it elsewhere.
 
 ## Start here
 
@@ -16,8 +16,8 @@ $feature-delivery Add employee approval delegation
 For pinned models, explicit permissions and connector isolation, use the launcher from the application repository:
 
 ```sh
-python3.11 /Users/bikashsharma/agents/daily-work-agent-flow/scripts/workflow.py quick-fix 'Fix incorrect employee date formatting'
-python3.11 /Users/bikashsharma/agents/daily-work-agent-flow/scripts/workflow.py delivery 'Add employee approval delegation'
+python3.11 "$HOME/agents/daily-work-agent-flow/scripts/workflow.py" quick-fix 'Fix incorrect employee date formatting'
+python3.11 "$HOME/agents/daily-work-agent-flow/scripts/workflow.py" delivery 'Add employee approval delegation'
 ```
 
 Planning, discovery and review use separate read-only sessions; a skill alone cannot change a session's sandbox or model. Native parent permission overrides can supersede subagent defaults, so the launcher is the enforced phase boundary. The writable coordinator displays the plan and waits for approval unless explicitly invoked with `--auto-implement`.
